@@ -2,11 +2,12 @@
 #include <math.h>
 
 #define BRIGHTNESS  200
-#define NUM_LEDS 75
+#define NUM_LEDS 76
 
 CRGB leds[NUM_LEDS];
 
 int pin14;
+int halfLeds = NUM_LEDS / 2;
 void setup()
 {
     delay(2000); // sanity delay
@@ -16,8 +17,7 @@ void setup()
 	randomSeed(pin14);
     random16_add_entropy(random());
 
-
-    LEDS.addLeds<WS2812, 7, GRB>(leds, NUM_LEDS);
+    LEDS.addLeds<WS2812, 7, GRB>(leds, NUM_LEDS); // <gerstle> teensy
     FastLED.setBrightness(BRIGHTNESS);
 
 }
@@ -37,7 +37,7 @@ void loop()
         int j = 0;
         hueTracker += 0.0001;
         valueTracker += 0.001;
-        for (j = 0; j < NUM_LEDS; j++)
+        for (j = 0; j < halfLeds; j++)
         {
             valueTracker += 0.0001;
             hueTracker += 0.00001;
@@ -46,8 +46,8 @@ void loop()
             value = pnoise(valueTracker + sin((j + valueTracker) / 2) , cos(valueTracker), valueTracker);
             hue = pnoise(cos(hueTracker / 5.0) + sin((j + hueTracker) / 30.0) , cos(hueTracker / 5.0), hueTracker);
             
-
             leds[j] = CHSV((hue * 127) + 128, 255, (value * (double)127) + 128);
+            leds[NUM_LEDS - j] = leds[j];
         }
         FastLED.show(); // display this frame
     //}
